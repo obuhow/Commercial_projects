@@ -2,11 +2,11 @@ from urllib.request import urlopen
 from bs4 import BeautifulSoup
 import xlwt
 
-def parse_html_obj():
+def parse_html_obj(url, cols):
     workbook = xlwt.Workbook(encoding='utf-8')
-    worksheet = workbook.add_sheet("List 1")
+    worksheet = workbook.add_sheet("Price")
 
-    html = urlopen("https://www.krpms.ru/catalog/rvd/gidravlicheskie-rukava-rvd/rvd1sn/").read().decode('utf-8')
+    html = urlopen(url).read().decode('utf-8')
     s = str(html)
     soup = BeautifulSoup(s, 'html.parser')
 
@@ -17,14 +17,16 @@ def parse_html_obj():
 
     counter = 0
     for row in soup.find_all('div', attrs={'class': 'tab divhref'}):
-            worksheet.write(counter // 9 + 1, counter % 9, row.string)
+            worksheet.write(counter // cols + 1, counter % cols, row.string)
             counter += 1
 
-    workbook.save("table.xls")
+    workbook.save("Price.xls")
 
 
 if __name__ == '__main__':
-    parse_html_obj()
+    url = "https://astra-rvd.ru/1sn-ultimate"
+    cols = 4
+    parse_html_obj(url, cols)
 
 
 
