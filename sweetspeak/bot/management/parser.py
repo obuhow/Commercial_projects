@@ -1,20 +1,21 @@
-import os.path
-
 from urllib.request import urlopen
 from bs4 import BeautifulSoup
+from sweetspeak.bot.models import Bot, PublishedPosts
 
 
 class SweetSpeak:
 	sitemap_url = "https://sweetspeak.ru/sitemap.html"
-	last_article_url = ""
-	last_article_url_file = ""
+	last_post_url = ""
+
+	def __init__(self):
+		self.last_post_url = PublishedPosts.objects.all.reverse[0].url
 
 	def get_url_list(self):
 		sitemaps = self.get_urls_by_filter(self.sitemap_url, 'post')
-		new_articles_urls = []
+		all_articles_urls = []
 		for sitemap in sitemaps:
-			new_articles_urls.extend(self.get_urls_by_filter(sitemap, 'http'))
-		return new_articles_urls
+			all_articles_urls.extend(self.get_urls_by_filter(sitemap, 'http'))
+		return all_articles_urls
 
 	def get_urls_by_filter(self, url, search_filter):
 		html = urlopen(url).read().decode('utf-8')
@@ -23,18 +24,21 @@ class SweetSpeak:
 		for a in soup.find_all('a', href=True):
 			if a.string.find(search_filter) != -1:
 				hrefs.append(a['href'])
-		return hrefs[0]
+		return hrefs
 
-	def update_last_article_url(self):
-		self.last_article_url = self.get_last_article_url()
+	def make_new_posts(self):
+		last_post_sending_time = Bot.objects.all.reverse[0].sending_datetime
 
-	def is_new_article(self):
-		new_article_url = self.get_last_article_url()
-		return True if new_article_url != self.last_article_url else None
+		urls = self.get_url_list()
+		for link in urls:
+			post = self.make_a_post_from_the_article(link)
+			Bot.objects.create(sending_datetime='%Y-%m-%d %H:%M:%S',
+							   url=link,
+							   post=post,)
 
-	def make_a_post_from_the_article(self):
+	def make_a_post_from_the_article(self, url):
 		# parse the article
-		html = urlopen(self.last_article_url).read().decode('utf-8')
+		html = urlopen(url.read().decode('utf-8')
 		soup = BeautifulSoup(str(html), 'lxml')
 		# get the first paragraph of the article
 		paragraph = ''
@@ -51,5 +55,5 @@ class SweetSpeak:
 					p -= 1
 			p += 1
 		# add a link to the article
-		post = paragraph + '\n' + self.last_article_url
+		post = paragraph + '\n' + url
 		return post

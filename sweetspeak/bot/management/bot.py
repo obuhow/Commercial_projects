@@ -32,7 +32,6 @@ def log_errors(f):
     return inner
 
 
-@log_errors(send_the_post_to_the_channel)
 async def send_the_post_to_the_channel(channel_id: int, text: str):
     await bot.send_message(channel_id, text)
 
