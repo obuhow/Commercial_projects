@@ -4,8 +4,6 @@ tts = pyttsx3.init()
 
 RU_VOICE_ID = "HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Speech\Voices\TokenEnums\RHVoice\Victoria"
 
-# Теперь — русский
-
 tts.setProperty('voice', RU_VOICE_ID)
 
 tts.save_to_file("""Отношения, в которых жена выступает сексвайф, а муж является куколдом встречаются редко.
