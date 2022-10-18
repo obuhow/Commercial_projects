@@ -3,7 +3,7 @@ from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from aiogram import Bot, Dispatcher, executor
 
 import config
-from parser import SweetSpeak
+from parser import SweetSpeakParser
 from sweetspeak.bot.models import Bot
 
 CHANNEL_ID = -1001516084523
@@ -14,7 +14,7 @@ dp = Dispatcher(bot)
 
 # initialize the parser
 db = Bot.objects.all()
-sweet_speak = SweetSpeak()
+sweet_speak = SweetSpeakParser()
 
 # initialize the scheduler
 scheduler = AsyncIOScheduler()

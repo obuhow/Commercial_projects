@@ -1,13 +1,13 @@
 from django.contrib import admin
 
-from .models import Bot, PublishedPosts
-from .forms import BotAdminForms
+from .models import ScheduledPosts, PublishedPosts
+from .forms import ScheduledPostsAdminForms
 
-@admin.register(Bot)
-class BotAdmin(admin.ModelAdmin):
+@admin.register(ScheduledPosts)
+class ScheduledPostsAdmin(admin.ModelAdmin):
     list_display = ('sending_datetime', 'channel_id', 'url', 'post')
-    form = BotAdminForms
+    form = ScheduledPostsAdminForms
 
 @admin.register(PublishedPosts)
-class PublishedPostsAdmin(BotAdmin):
+class PublishedPostsAdmin(ScheduledPostsAdmin):
     pass

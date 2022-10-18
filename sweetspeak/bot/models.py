@@ -3,7 +3,7 @@ from datetime import datetime
 from django.db import models
 
 
-class Bot(models.Model):
+class ScheduledPosts(models.Model):
     sending_datetime = models.CharField(
         max_length=20,
         verbose_name='Дата отправки',
@@ -20,7 +20,7 @@ class Bot(models.Model):
     )
     post = models.TextField(
         verbose_name='Пост',
-        default = 'Этот пост еще не написан'
+        default = 'Этот пост еще не написан',
     )
 
     def __str__(self):
@@ -31,7 +31,7 @@ class Bot(models.Model):
         verbose_name_plural = 'Расписание постов'
 
 
-class PublishedPosts(Bot):
+class PublishedPosts(ScheduledPosts):
 
     class Meta:
         verbose_name = 'Опубликованные посты'

@@ -3,7 +3,7 @@ from bs4 import BeautifulSoup
 from sweetspeak.bot.models import Bot, PublishedPosts
 
 
-class SweetSpeak:
+class SweetSpeakParser:
 	sitemap_url = "https://sweetspeak.ru/sitemap.html"
 	last_post_url = ""
 
