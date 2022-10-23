@@ -24,7 +24,7 @@ class ScheduledPosts(models.Model):
     )
 
     def __str__(self):
-        return f'Пост #{post_id}'
+        return f'Пост'
 
     class Meta:
         verbose_name = 'Расписание постов'

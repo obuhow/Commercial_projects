@@ -38,7 +38,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'rumors.apps.RumorsConfig',
-    'bot.apps.BotConfig'
+    'bot.apps.BotConfig',
 ]
 
 MIDDLEWARE = [
