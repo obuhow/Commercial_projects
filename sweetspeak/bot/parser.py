@@ -2,6 +2,7 @@ from datetime import datetime, timedelta
 
 from urllib.request import urlopen
 from bs4 import BeautifulSoup
+import lxml
 
 from .models import ScheduledPosts, PublishedPosts
 
@@ -12,7 +13,7 @@ class SweetSpeakParser:
 
     def __init__(self):
         db_last = PublishedPosts.objects.last()
-        self.last_post_url = db_last.url
+        self.last_post_url = db_last.url_p
 
     # The site map consists of the home page and internal pages
     def get_url_list(self):
@@ -45,9 +46,12 @@ class SweetSpeakParser:
     # Making posts from articles and writing them into the database
     def make_new_posts(self):
         db_last = ScheduledPosts.objects.last()
-        last_post_sending_time_string = db_last.sending_datetime
-        last_post_sending_time = datetime.strptime(last_post_sending_time_string, '%Y-%m-%d %H:%M:%S')
-        new_post_datetime = last_post_sending_time + timedelta(days=1)
+        if db_last != None:
+            last_post_sending_time_string = db_last.sending_datetime
+            last_post_sending_time = datetime.strptime(last_post_sending_time_string, '%Y-%m-%d %H:%M:%S')
+            new_post_datetime = last_post_sending_time + timedelta(days=1)
+        else:
+            new_post_datetime = datetime.now() + timedelta(days=1)
         urls = self.new_articles_urls()
         urls_from_end = urls.reverse()
         for link in urls_from_end:

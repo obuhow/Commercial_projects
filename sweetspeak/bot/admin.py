@@ -1,7 +1,7 @@
 from django.contrib import admin
 
 from .models import ScheduledPosts, PublishedPosts
-from .forms import ScheduledPostsAdminForms
+from .forms import ScheduledPostsAdminForms, PublishedPostsAdminForms
 
 @admin.register(ScheduledPosts)
 class ScheduledPostsAdmin(admin.ModelAdmin):
@@ -9,5 +9,6 @@ class ScheduledPostsAdmin(admin.ModelAdmin):
     form = ScheduledPostsAdminForms
 
 @admin.register(PublishedPosts)
-class PublishedPostsAdmin(ScheduledPostsAdmin):
-    pass
+class PublishedPostsAdmin(admin.ModelAdmin):
+    list_display = ('sending_datetime_p', 'channel_id_p', 'url_p', 'post_p')
+    form = PublishedPostsAdminForms
