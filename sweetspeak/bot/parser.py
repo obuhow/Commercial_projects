@@ -12,8 +12,12 @@ class SweetSpeakParser:
     last_post_url = ""
 
     def __init__(self):
-        db_last = PublishedPosts.objects.last()
-        self.last_post_url = db_last.url_p
+        if ScheduledPosts.objects.last():
+            db_last = ScheduledPosts.objects.last()
+            self.last_post_url = db_last.url
+        else:
+            db_last = PublishedPosts.objects.last()
+            self.last_post_url = db_last.url_p
 
     # The site map consists of the home page and internal pages
     def get_url_list(self):
@@ -41,6 +45,7 @@ class SweetSpeakParser:
             if link == self.last_post_url:
                 break
             new_articles_links.append(link)
+        new_articles_links.reverse()
         return new_articles_links
 
     # Making posts from articles and writing them into the database
@@ -51,12 +56,11 @@ class SweetSpeakParser:
             last_post_sending_time = datetime.strptime(last_post_sending_time_string, '%Y-%m-%d %H:%M:%S')
             new_post_datetime = last_post_sending_time + timedelta(days=1)
         else:
-            new_post_datetime = datetime.now() + timedelta(days=1)
+            new_post_datetime = datetime.now() + timedelta(minutes=5)
         urls = self.new_articles_urls()
-        urls_from_end = urls.reverse()
-        for link in urls_from_end:
+        for link in urls:
             post1 = self.make_a_post_from_the_article(link)
-            ScheduledPosts.objects.create(sending_datetime=new_post_datetime,
+            ScheduledPosts.objects.create(sending_datetime=new_post_datetime.strftime('%Y-%m-%d %H:%M:%S'),
                                           url=link,
                                           post=post1, )
             new_post_datetime = new_post_datetime + timedelta(1)
