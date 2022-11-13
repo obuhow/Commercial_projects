@@ -1,46 +1,57 @@
+import time
+from datetime import datetime
+
 import telebot
 from apscheduler.schedulers.background import BackgroundScheduler
-import pytz
-import time
 
-from .config import API_TOKEN
+from .config import API_TOKEN, UPDATE_HOUR, UPDATE_MINUTE
 from .parser import SweetSpeakParser
-from .models import ScheduledPosts
+from .models import ScheduledPosts, PublishedPosts
 
-# initialize the bot
+
+
+# initialize the bot, scheduler, parser
 bot = telebot.TeleBot(API_TOKEN)
-
-# initialize the scheduler
-scheduler = BackgroundScheduler()
-
-# parse new articles
+scheduler = BackgroundScheduler(timezone="Europe/Moscow")
 sweetspeak = SweetSpeakParser()
-sweetspeak.make_new_posts()
 db = ScheduledPosts.objects.all()
 
-# start feed at scheduled time
+def send_message(channel_id, post, url):
+    print("Send Message")
+    # send message and update databases
+    bot.send_message(channel_id, post)
+    published_post = ScheduledPosts.objects.get(url=url)
+    sending_datetime = datetime.now()
+    sending_datetime_string = sending_datetime.strftime('%Y-%m-%d %H:%M:%S'),
+    PublishedPosts.objects.create(sending_datetime_p=sending_datetime_string,
+                                  channel_id_p=published_post.channel_id,
+                                  url_p=published_post.url, post_p=published_post.post,)
+    published_post.delete()
+
 def plan_feed():
-    tz = pytz.timezone('Europe/Moscow')
-    i = 1
+    print("Plan feed")
+    sweetspeak.make_new_posts()
+    # start feed at scheduled time
+    jobs = scheduler.get_jobs()
     for feed in db:
-        scheduler.add_job(bot.send_message, args=['@sweet_speak_test', feed.post],
-                          id=f'job_date_once {i}', trigger='date',
-                          run_date=feed.sending_datetime, timezone=tz)
-        i += 1
+        repeat_task = 1
+        for job in jobs:
+            if feed.url == job.id:
+                print("Found job")
+                repeat_task = 0
+        if repeat_task:
+            print("Add job")
+            scheduler.add_job(send_message, args=[feed.channel_id, feed.post, feed.url],
+                              id=feed.url, trigger='date',
+                              run_date=feed.sending_datetime)
+
+def start_sheduler():
+    print("Start sheduler")
+    # update shedule with posts every day at certain time
+    scheduler.add_job(plan_feed, id='start',
+                      trigger='cron', hour=UPDATE_HOUR, minute=UPDATE_MINUTE)
     scheduler.start()
 
-@bot.message_handler(content_types=['text', 'document', 'audio'])
-def get_text_messages(message):
-    if message.text == "Привет":
-        bot.send_message(message.from_user.id, "Привет, чем я могу тебе помочь?")
-    elif message.text == "/help":
-        bot.send_message(message.from_user.id, "Напиши привет")
-    else:
-        bot.send_message(message.from_user.id, "Я тебя не понимаю. Напиши /help.")
-
-plan_feed()
-
-dblast = ScheduledPosts.objects.last()
-bot.send_message(dblast.channel_id, text=dblast.post)
-
+# start sheduler 
+start_sheduler()
 bot.polling(none_stop=True, interval=0)
